@@ -1,0 +1,41 @@
+#include <stdio.h> 
+#include <stdlib.h> 
+#include <unistd.h> 
+#include <fcntl.h> 
+#include <sys/wait.h> 
+int main() { 
+ int fd[2]; 
+ pid_t p1, p2; 
+ /* Create a pipe */ 
+ if (pipe(fd) < 0) { 
+ perror("Pipe Failed"); 
+ return 1; 
+ } 
+ /* Fork a process */ 
+ p1 = fork(); 
+ if (p1 < 0) { 
+ perror("Fork Failed"); 
+ return 1; 
+ } 
+ /* First process */ 
+ if (p1 == 0) { 
+ close(fd[0]); // Close reading end 
+ dup2(fd[1], STDOUT_FILENO); // Redirect stdout to writing end  execlp("ls", "ls", "-l", NULL); // Execute ls command  perror("Exec Failed"); 
+ return 1; 
+ } 
+ /* Fork another process */ 
+ p2 = fork(); 
+ if (p2 < 0) { 
+ perror("Fork Failed"); 
+ return 1; 
+ } 
+ /* Second process */ 
+ if (p2 == 0) { 
+ close(fd[1]); // Close writing end 
+ dup2(fd[0], STDIN_FILENO); // Redirect stdin to reading end
+ execlp("sort", "sort", NULL); // Execute sort command  perror("Exec Failed"); 
+ return 1; 
+ } 
+ /* Close reading and writing ends */ 
+ close(fd[0]); 
+ close(fd[1]); 
