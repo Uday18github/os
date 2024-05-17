@@ -1,0 +1,71 @@
+#include <stdio.h> 
+int canAllocate(int available[], int max[][10], int allocated[][10], int need[][10], int process, int resources)  { 
+ for (int i = 0; i < resources; i++) { 
+ if (available[i] < need[process][i] || allocated[process][i] > need[process][i]) 
+   return 0; 
+ } 
+ return 1; 
+} 
+void bankersAlgorithm(int processes, int resources, int available[], int max[][10], int allocated[][10]) {  int need[10][10], safeSequence[10]; 
+ int finished[10] = {0}; 
+ for (int i = 0; i < processes; i++) { 
+ for (int j = 0; j < resources; j++) { 
+ need[i][j] = max[i][j] - allocated[i][j]; 
+ } 
+ } 
+ int work[10]; 
+ for (int i = 0; i < resources; i++) { 
+ work[i] = available[i]; 
+ } 
+ int count = 0; 
+ while (count < processes) { 
+ int found = 0; 
+ for (int i = 0; i < processes; i++) { 
+ if (!finished[i] && canAllocate(work, max, allocated, need, i, resources)) { 
+ work[j] += allocated[i][j]; 
+ } 
+ safeSequence[count++] = i; 
+ finished[i] = 1; 
+ found = 1; 
+ } 
+ } 
+ if (!found) { 
+ printf("System is in unsafe state!\n"); 
+ return; 
+ } 
+ }  
+ printf("Safe Sequence: "); 
+ for (int i = 0; i < processes; i++) { 
+ printf("%d ", safeSequence[i]); 
+ }
+ printf("\n"); 
+} 
+int main() { 
+ int processes, resources; 
+ printf("Enter number of processes: "); 
+ scanf("%d", &processes); 
+ printf("Enter number of resources: "); 
+ scanf("%d", &resources); 
+ int available[10], max[10][10], allocated[10][10];  
+ printf("Enter available resources: "); 
+ for (int i = 0; i < resources; i++) { 
+ scanf("%d", &available[i]); 
+ } 
+ printf("Enter maximum resources required by each process: \n");
+ for (int i = 0; i < processes; i++) { 
+ printf("For process %d: ", i); 
+ for (int j = 0; j < resources; j++) { 
+ scanf("%d", &max[i][j]); 
+ } 
+ } 
+ printf("Enter allocated resources for each process: \n"); 
+ for (int i = 0; i < processes; i++) { 
+ printf("For process %d: ", i); 
+ for (int j = 0; j < resources; j++) { 
+ scanf("%d", &allocated[i][j]); 
+ } 
+ } 
+ bankersAlgorithm(processes, resources, available, max, allocated); 
+ return 0; 
+}
+
